@@ -91,7 +91,7 @@ function handleDetection({ path, time }) {
       }
       return objects;
     })
-    .then(getNewObjects)
+    .then(objects => getNewObjects(objects))
     .then(newObjects => {
       if (!newObjects.length) {
         throw new Error('No new objects detected, bail')
@@ -105,7 +105,7 @@ function handleDetection({ path, time }) {
       return sendEmail({
         to: config.sendEmail.to,
         from: config.sendEmail.from,
-        subject: `Detected ${messages.length} objects in ${feed} feed`,
+        subject: `Detected ${messages.length} objects in ${config.feed} feed`,
         html: `<ul>${lines}</ul><br /><br /><img src="cid:${cid}" />`,
         attachments: [{
           filename: 'still.png',
@@ -115,7 +115,7 @@ function handleDetection({ path, time }) {
       });
     })
     .catch(err => {
-      // Do Nothing
+      log('Bailed from detection handler', err.message);
     })
     .then(() => {
       log('Removing', path);
