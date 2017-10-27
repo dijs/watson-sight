@@ -1,0 +1,20 @@
+{
+  "name": "watson-sight",
+  "version": "0.0.1",
+  "description": "Monitors video feed and detects objects which are sent to email",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Richard van der Dys",
+  "license": "MIT",
+  "dependencies": {
+    "@moovel/yolo": "^0.2.0",
+    "debug": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "moment": "^2.19.1",
+    "nodemailer": "^4.3.1",
+    "request": "^2.83.0",
+    "watch": "^1.0.2"
+  }
+}
