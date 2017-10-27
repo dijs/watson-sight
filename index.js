@@ -59,7 +59,7 @@ function detectObjects(path) {
         return reject(err);
       }
       const objects = JSON.parse(body)
-        .filter(([label, confidence]) => confidence >= minConfidence)
+        .filter(([label, confidence]) => confidence >= config.minConfidence)
         .map(([label, confidence, [x, y]]) => {
           return {
             label,
