@@ -9,6 +9,7 @@ const moment = require('moment');
 const createQueue = require('./siju');
 const sendEmail = require('./email');
 const config = require('./config.json');
+const getCaptures = require('./capture');
 
 const log = debug('detect');
 
@@ -60,11 +61,13 @@ function detectObjects(path) {
       }
       const objects = JSON.parse(body)
         .filter(([label, confidence]) => confidence >= config.minConfidence)
-        .map(([label, confidence, [x, y]]) => {
+        .map(([label, confidence, [x, y, w, h]]) => {
           return {
             label,
             x,
             y,
+            w,
+            h
           };
         });
       return resolve(objects);
@@ -97,6 +100,9 @@ function handleDetection({ path, time }) {
         throw new Error('No new objects detected, bail')
       }
       return newObjects;
+    })
+    .then(newObjects => {
+      return getCaptures(path, newObjects).then(() => newObjects);
     })
     .then(newObjects => {
       const messages = newObjects.map(({ label, x, y }) => createMessage(label, x, y, time));

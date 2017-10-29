@@ -1,6 +1,6 @@
 {
   "name": "watson-sight",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Monitors video feed and detects objects which are sent to email",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "@moovel/yolo": "^0.2.0",
     "debug": "^3.1.0",
     "fluent-ffmpeg": "^2.1.2",
+    "jimp": "^0.2.28",
     "moment": "^2.19.1",
     "nodemailer": "^4.3.1",
     "request": "^2.83.0",
