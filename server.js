@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('./config.json');
 const fs = require('fs');
 const debug = require('debug');
+const cors = require('cors');
 
 const app = express();
 const log = debug('detect.server');
@@ -10,8 +11,10 @@ const startsWith = prefix => text => text.indexOf(prefix) === 0;
 const byId = name => name.match(/\w+_(\d+)/)[1];
 const byMax = (max, n) => Math.max(max, n);
 
+app.use(cors());
+
 app.get('/untagged', (req, res) => {
-  res.json(fs.readdirSync('./captures'));
+  res.json(fs.readdirSync('./captures').filter(filename => filename.indexOf('.') !== 0));
 });
 
 app.get('/untagged/:file', (req, res) => {

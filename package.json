@@ -9,6 +9,7 @@
   "author": "Richard van der Dys",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.4",
     "debug": "^3.1.0",
     "express": "^4.16.2",
     "fluent-ffmpeg": "^2.1.2",
