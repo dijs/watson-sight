@@ -9,8 +9,8 @@
   "author": "Richard van der Dys",
   "license": "MIT",
   "dependencies": {
-    "@moovel/yolo": "^0.2.0",
     "debug": "^3.1.0",
+    "express": "^4.16.2",
     "fluent-ffmpeg": "^2.1.2",
     "jimp": "^0.2.28",
     "moment": "^2.19.1",

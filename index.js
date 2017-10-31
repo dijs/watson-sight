@@ -10,6 +10,7 @@ const createQueue = require('./siju');
 const sendEmail = require('./email');
 const config = require('./config.json');
 const getCaptures = require('./capture');
+const startServer = require('./server');
 
 const log = debug('detect');
 
@@ -156,3 +157,5 @@ watch.createMonitor(pathToStills, monitor => {
     }
   });
 });
+
+startServer();

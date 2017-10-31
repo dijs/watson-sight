@@ -6,3 +6,5 @@ config.json
 node_modules/
 temp.log
 captures/
+tagged/
+negatives/
