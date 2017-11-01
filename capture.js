@@ -6,7 +6,12 @@ function capture(path, { label, x, y, w, h }) {
   const right = Math.floor(left + w);
   const bottom = Math.floor(top + h);
   const toFile = `./captures/${label}_${Date.now()}_${left}_${right}_${top}_${bottom}.png`;
-  fs.renameSync(path, toFile);
+  try {
+    fs.renameSync(path, toFile);
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
+  }
 }
 
 module.exports = function (stillPath, detections) {
