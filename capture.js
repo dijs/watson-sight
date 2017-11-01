@@ -1,16 +1,12 @@
-const jimp = require('jimp');
+const fs = require('fs');
 
 function capture(path, { label, x, y, w, h }) {
-  const toFile = `./captures/${label}-${Date.now()}-${Math.random()*10e16}.jpg`;
-  const left = x - w / 2;
-  const top = y - h / 2;
-  return jimp
-    .read(path)
-    .then(image => {
-      return image
-        .crop(left, top, w, h)
-        .write(toFile);
-    });
+  const left = Math.floor(x - w / 2);
+  const top = Math.floor(y - h / 2);
+  const right = left + w;
+  const bottom = top + h;
+  const toFile = `./captures/${label}_${Date.now()}_${left}_${right}_${top}_${bottom}.png`;
+  fs.renameSync(path, toFile);
 }
 
 module.exports = function (stillPath, detections) {

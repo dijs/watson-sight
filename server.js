@@ -3,6 +3,7 @@ const config = require('./config.json');
 const fs = require('fs');
 const debug = require('debug');
 const cors = require('cors');
+const { basename } = require('path');
 
 const app = express();
 const log = debug('detect.server');
@@ -23,13 +24,12 @@ app.get('/untagged/:file', (req, res) => {
 
 app.get('/tag/:file/:label', (req, res) => {
   const { label, file } = req.params;
-  const id = fs
-    .readdirSync('./tagged')
-    .filter(startsWith(label))
-    .map(byId)
-    .reduce(byMax, 0) + 1;
-  fs.renameSync(`./captures/${file}`, `./tagged/${label}_${id}.jpg`);
-  res.json(id);
+  const [, timestamp, left, right, top, bottom] = basename(file, '.png').split('_');
+  fs.renameSync(
+    `./captures/${file}`,
+    `./tagged/${label}_${timestamp}_${left}_${right}_${top}_${bottom}.png`
+  );
+  res.json({ success: true });
 });
 
 app.get('/negative/:file', (req, res) => {
