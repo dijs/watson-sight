@@ -9,3 +9,4 @@ captures/
 tagged/
 negatives/
 captures-old
+*lock.json

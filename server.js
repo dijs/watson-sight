@@ -4,7 +4,8 @@ const fs = require('fs');
 const debug = require('debug');
 const cors = require('cors');
 const { basename } = require('path');
-
+const uniq = require('lodash/uniq');
+const isEqual = require('lodash/isEqual');
 const app = express();
 const log = debug('detect.server');
 
@@ -16,6 +17,41 @@ app.use(cors());
 
 app.get('/untagged', (req, res) => {
   res.json(fs.readdirSync('./captures').filter(filename => filename.indexOf('.') !== 0));
+});
+
+app.get('/labels', (req, res) => {
+  try {
+    res.json(JSON.parse(fs.readFileSync('./config.json', 'utf8')).labels || []);
+  } catch(e) {
+    log('Could not read labels', e);
+    res.json([]);
+  }
+});
+
+app.get('/add-label/:label', (req, res) => {
+  try {
+    const oldConfig = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+    const newLabels = uniq([...(oldConfig.labels || []), req.params.label]);
+    if (isEqual(oldConfig.labels, newLabels)) {
+      res.json({
+        success: true,
+        noChangeNeeded: true
+      });
+      return;
+    }
+    const newConfig = Object.assign({}, oldConfig, {
+      labels: newLabels,
+    });
+    fs.writeFileSync('./config.json', JSON.stringify(newConfig, null, 3));
+    res.json({
+      success: true,
+    });
+  } catch(e) {
+    res.json({
+      success: false,
+      error: e,
+    });
+  }
 });
 
 app.get('/untagged/:file', (req, res) => {
@@ -38,9 +74,13 @@ app.get('/negative/:file', (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/', (req, res) => res.send('Welcome to the Watson Object Tagger'));
+
 const start = () => {
   app.listen(config.serverPort);
   log(`Listening @ http://localhost:${config.serverPort}`);
 };
 
 module.exports = start;
+
+start();
