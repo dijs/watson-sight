@@ -54,8 +54,12 @@ app.get('/add-label/:label', (req, res) => {
   }
 });
 
-app.get('/untagged/:file', (req, res) => {
-  fs.createReadStream(`./captures/${req.params.file}`).pipe(res);
+app.get('/untagged/:file', (req, res, next) => {
+  try {
+    fs.createReadStream(`./captures/${req.params.file}`).pipe(res);
+  } catch(e) {
+    next(new Error(`Could not find untagged image ${req.params.file}`));
+  }
 });
 
 app.get('/tag/:file/:label', (req, res) => {
