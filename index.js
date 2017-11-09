@@ -144,12 +144,16 @@ function handleDetection({ path, time }) {
       log('Bailed from detection handler', err.message);
     })
     .then(() => {
-      log('Removing', path);
-      try {
-        fs.unlinkSync(path);
-      } catch (e) {
-        // Do nothing
-      }
+      setTimeout(() => {
+        log('Removing', path);
+        try {
+          fs.unlinkSync(path);
+        } catch (e) {
+          log('There was an issue removing the still image', path);
+          // Do nothing
+        }     
+      // Wait a while for things to stop using the file before removing...   
+      }, 10000);
     });
 }
 
