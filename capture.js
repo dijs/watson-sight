@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const join = require('path').join;
 
 function capture(path, { label, x, y, w, h }) {
@@ -8,7 +8,7 @@ function capture(path, { label, x, y, w, h }) {
   const bottom = Math.floor(top + h);
   const toFile = join(__dirname, `captures/${label}_${Date.now()}_${left}_${right}_${top}_${bottom}.png`);
   try {
-    fs.copyFileSync(path, toFile);
+    fs.copySync(path, toFile);
     return Promise.resolve(toFile);
   } catch (err) {
     return Promise.reject(err);
