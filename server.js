@@ -3,11 +3,13 @@ const config = require('./config.json');
 const fs = require('fs');
 const debug = require('debug');
 const cors = require('cors');
-const { basename } = require('path');
+const { basename, join } = require('path');
 const uniq = require('lodash/uniq');
 const isEqual = require('lodash/isEqual');
 const app = express();
 const log = debug('detect.server');
+
+const recognize = require('../watson-object-recognizer/recognize');
 
 const startsWith = prefix => text => text.indexOf(prefix) === 0;
 const byId = name => name.match(/\w+_(\d+)/)[1];
@@ -17,6 +19,12 @@ app.use(cors());
 
 app.get('/untagged', (req, res) => {
   res.json(fs.readdirSync('./captures').filter(filename => filename.indexOf('.') !== 0));
+});
+
+app.get('/recognize/:file', (req, res, next) => {
+  recognize(join(__dirname, 'captures', req.params.file))
+    .then(info => res.json(info))
+    .catch(err => next(err));
 });
 
 app.get('/labels', (req, res) => {
