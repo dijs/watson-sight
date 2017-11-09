@@ -1,11 +1,12 @@
 const fs = require('fs');
+const join = require('path').join;
 
 function capture(path, { label, x, y, w, h }) {
   const left = Math.floor(x - w / 2);
   const top = Math.floor(y - h / 2);
   const right = Math.floor(left + w);
   const bottom = Math.floor(top + h);
-  const toFile = `./captures/${label}_${Date.now()}_${left}_${right}_${top}_${bottom}.png`;
+  const toFile = join(__dirname, `captures/${label}_${Date.now()}_${left}_${right}_${top}_${bottom}.png`);
   try {
     fs.renameSync(path, toFile);
     return Promise.resolve(toFile);

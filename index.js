@@ -11,9 +11,11 @@ const sendEmail = require('./email');
 const config = require('./config.json');
 const getCaptures = require('./capture');
 const startServer = require('./server');
+const recognize = require('../watson-object-recognizer/recognize');
 
 const log = debug('detect');
 
+const scoreThreshold = 0.8;
 const pathToStills = `${__dirname}/stills`;
 const quadrants = [
   ['top-left', 'top', 'top-right'],
@@ -33,8 +35,15 @@ const byNew = detection => {
   return !lastDetection.some(lastId => id === lastId);
 };
 
-const createMessage = (label, x, y, time) => {
-  return `Detected a <b>${label}</b> in the ${quadrant(x, y)} of the ${config.feed.toLowerCase()} feed at ${moment(time).format('h:mm a on dddd, MMM Do')}`;
+function itemTitle(guess, score, label) {
+  if (score >= scoreThreshold) {
+    return `Recognized <b>${guess}</b> (${Math.round(score * 100)}%)`;
+  }
+  return `Detected a <b>${label}</b>`;
+}
+
+const createMessage = ({ label, x, y, time, guess, score }) => {
+  return `${itemTitle(guess, score, label)} in the ${quadrant(x, y)} of the ${config.feed.toLowerCase()} feed at ${moment(time).format('h:mm a on dddd, MMM Do')}`;
 };
 
 function getNewObjects(objects) {
@@ -103,10 +112,20 @@ function handleDetection({ path, time }) {
       return newObjects;
     })
     .then(newObjects => {
-      return getCaptures(path, newObjects).then(() => newObjects);
+      // Save captured files with proper filename
+      return getCaptures(path, newObjects)
+        .then(capturePaths => {
+          // Now try to recognize the object in the image
+          return Promise.all(capturePaths.map((capturePath, index) => {
+            return recognize(capturePath).then(info => {
+              // Assign results
+              return Object.assign({} , newObjects[index], info);
+            });
+          }));
+        });
     })
     .then(newObjects => {
-      const messages = newObjects.map(({ label, x, y }) => createMessage(label, x, y, time));
+      const messages = newObjects.map(createMessage);
       const lines = messages.map(m => `<li>${m}</li>`).join('');
       const cid = config.sendEmail.cid;
       return sendEmail({
