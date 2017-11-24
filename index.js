@@ -12,6 +12,7 @@ const config = require('./config.json');
 const getCaptures = require('./capture');
 const startServer = require('./server');
 const recognize = require('../watson-object-recognizer/recognize');
+const EventEmitter = require('events');
 
 const log = debug('detect');
 
@@ -23,6 +24,8 @@ const quadrants = [
   ['bottom-left', 'bottom', 'bottom-right'],
 ];
 let lastDetection = [];
+
+const DetectionEvents = new EventEmitter();
 
 const quadrant = (x, y) => {
   return quadrants[Math.floor(y / config.stillHeight * 3)][Math.floor(x / config.stillWidth * 3)];
@@ -119,7 +122,12 @@ function handleDetection({ path, time }) {
           return Promise.all(capturePaths.map((capturePath, index) => {
             return recognize(capturePath).then(info => {
               // Assign results
-              return Object.assign({} , newObjects[index], info);
+              const recog = Object.assign({} , newObjects[index], info);
+              DetectionEvents.emit('recognized', Object.assign({}, recog, {
+                time,
+                capturePath
+              }));
+              return recog;
             });
           }));
         });
@@ -128,6 +136,9 @@ function handleDetection({ path, time }) {
       const messages = newObjects.map(createMessage);
       const lines = messages.map(m => `<li>${m}</li>`).join('');
       const cid = config.sendEmail.cid;
+
+      DetectionEvents.emit('detected', newObjects);
+
       return sendEmail({
         to: config.sendEmail.to,
         from: config.sendEmail.from,
@@ -150,7 +161,7 @@ function handleDetection({ path, time }) {
       } catch (e) {
         log('There was an issue removing the still image', path);
         // Do nothing
-      }     
+      }
     });
 }
 
@@ -161,6 +172,7 @@ watch.createMonitor(config.pathToVideos, monitor => {
   monitor.on('created', function (path, stat) {
     if (extension(path) === '.m4v') {
       log('New video was created, fetching stills');
+      DetectionEvents.emit('message', 'Motion Detected');
       getStills(path);
     }
   });
@@ -178,4 +190,4 @@ watch.createMonitor(pathToStills, monitor => {
   });
 });
 
-startServer();
+startServer(DetectionEvents);

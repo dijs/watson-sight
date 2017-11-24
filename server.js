@@ -6,14 +6,33 @@ const cors = require('cors');
 const { basename, join } = require('path');
 const uniq = require('lodash/uniq');
 const isEqual = require('lodash/isEqual');
-const app = express();
-const log = debug('detect.server');
 
+const app = express();
+
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+const log = debug('detect.server');
 const recognize = require('../watson-object-recognizer/recognize');
 
 const startsWith = prefix => text => text.indexOf(prefix) === 0;
 const byId = name => name.match(/\w+_(\d+)/)[1];
 const byMax = (max, n) => Math.max(max, n);
+
+let lastEvents = [];
+try {
+  lastEvents = JSON.parse(fs.readFileSync('./last-events.json', 'utf8'));
+} catch(e) {
+  log('Could not load last events');
+}
+
+function addToLastEvents(name, data) {
+  lastEvents.unshift({ name, data });
+  if (lastEvents.length > 100) {
+    lastEvents.pop();
+  }
+  fs.writeFileSync('./last-events.json', JSON.stringify(lastEvents, null, 3));
+}
 
 app.use(cors());
 
@@ -63,11 +82,11 @@ app.get('/add-label/:label', (req, res) => {
 });
 
 app.get('/untagged/:file', (req, res, next) => {
-  try {
-    fs.createReadStream(`./captures/${req.params.file}`).pipe(res);
-  } catch(e) {
-    next(new Error(`Could not find untagged image ${req.params.file}`));
-  }
+  fs.createReadStream(`${__dirname}/captures/${req.params.file}`)
+    .on('error', err => {
+      next(new Error(`Could not find untagged image ${req.params.file}. ${err.message}`));
+    })
+    .pipe(res);
 });
 
 app.get('/tag/:file/:label', (req, res) => {
@@ -86,11 +105,32 @@ app.get('/negative/:file', (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/temp/:temp/:location/:time', (req, res) => {
+  const { temp, location, time } = req.params;
+  const data = { temp, location, time };
+  io.emit('temp', data);
+  addToLastEvents('temp', data);
+  res.json({ success: true });
+});
+
 app.get('/', (req, res) => res.send('Welcome to the Watson Object Tagger'));
 
-const start = () => {
-  app.listen(config.serverPort);
+
+io.on('connection', socket => {
+  socket.emit('update', lastEvents);
+});
+
+const start = DetectionEvents => {
+  http.listen(config.serverPort);
   log(`Listening @ http://localhost:${config.serverPort}`);
+  // Forward detection events to all sockets
+  DetectionEvents.on('message', message => io.emit('message', message));
+  DetectionEvents.on('detected', objects => io.emit('detected', objects));
+  DetectionEvents.on('recognized', data => {
+    // Save to queue
+    addToLastEvents('recognized', data);
+    io.emit('recognized', data);
+  });
 };
 
 module.exports = start;
