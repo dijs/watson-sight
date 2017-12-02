@@ -89,6 +89,14 @@ app.get('/untagged/:file', (req, res, next) => {
     .pipe(res);
 });
 
+app.get('/tagged/:file', (req, res, next) => {
+  fs.createReadStream(`${__dirname}/tagged/${req.params.file}`)
+    .on('error', err => {
+      next(new Error(`Could not find tagged image ${req.params.file}. ${err.message}`));
+    })
+    .pipe(res);
+});
+
 app.get('/tag/:file/:label', (req, res) => {
   const { label, file } = req.params;
   const [, timestamp, left, right, top, bottom] = basename(file, '.png').split('_');
