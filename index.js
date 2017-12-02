@@ -11,7 +11,7 @@ const sendEmail = require('./email');
 const config = require('./config.json');
 const getCaptures = require('./capture');
 const startServer = require('./server');
-const recognize = require('../watson-object-recognizer/recognize');
+const recognize = require('./recognize');
 const EventEmitter = require('events');
 
 const log = debug('detect');

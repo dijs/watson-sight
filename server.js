@@ -13,7 +13,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
 const log = debug('detect.server');
-const recognize = require('../watson-object-recognizer/recognize');
+const recognize = require('./recognize');
 
 const startsWith = prefix => text => text.indexOf(prefix) === 0;
 const byId = name => name.match(/\w+_(\d+)/)[1];

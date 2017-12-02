@@ -11,3 +11,4 @@ negatives/
 captures-old
 *lock.json
 last-events.json
+temp/
