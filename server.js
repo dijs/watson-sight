@@ -5,6 +5,7 @@ const debug = require('debug');
 const cors = require('cors');
 const { basename, join } = require('path');
 const uniq = require('lodash/uniq');
+const find = require('lodash/find');
 const isEqual = require('lodash/isEqual');
 
 const app = express();
@@ -119,6 +120,18 @@ app.get('/temp/:temp/:location/:time', (req, res) => {
   io.emit('temp', data);
   addToLastEvents('temp', data);
   res.json({ success: true });
+});
+
+
+app.get('/api/temp', (req, res) => {
+  res.json({
+    outside: find(lastEvents, event => {
+      return event.name === 'temp' && event.location === 'Outside';
+    }).temp,
+    inside: find(lastEvents, event => {
+      return event.name === 'temp' && event.location === 'Upstairs';
+    }).temp
+  });
 });
 
 app.get('/', (req, res) => res.send('Welcome to the Watson Object Tagger'));
