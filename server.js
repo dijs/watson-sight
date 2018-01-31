@@ -126,11 +126,11 @@ app.get('/temp/:temp/:location/:time', (req, res) => {
 app.get('/api/temp', (req, res) => {
   res.json({
     outside: find(lastEvents, event => {
-      return event.name === 'temp' && event.location === 'Outside';
-    }).temp,
+      return event.name === 'temp' && event.data.location === 'Outside';
+    }).data.temp,
     inside: find(lastEvents, event => {
-      return event.name === 'temp' && event.location === 'Upstairs';
-    }).temp
+      return event.name === 'temp' && event.data.location === 'Upstairs';
+    }).data.temp
   });
 });
 
