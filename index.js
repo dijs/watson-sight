@@ -65,8 +65,14 @@ function detectObjects(path) {
         log('Detection failed', err);
         return reject(err);
       }
-      const objects = JSON.parse(body)
+      const detections = JSON.parse(body);
+      log('Raw detections', JSON.stringify(detections, null, 3));
+      const objects = detections
         .filter(([label, confidence]) => confidence >= config.minConfidence)
+        .map(p => {
+          log(p[0], 'passed the confidence test');
+          return p;
+        })
         .map(([label, confidence, [x, y, w, h]]) => {
           return {
             label,
