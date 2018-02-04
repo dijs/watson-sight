@@ -7,6 +7,9 @@ const { basename, join } = require('path');
 const uniq = require('lodash/uniq');
 const find = require('lodash/find');
 const isEqual = require('lodash/isEqual');
+const matchesProperty = require('lodash/matchesProperty');
+const property = require('lodash/property');
+const getSummary = require('./summary');
 
 const app = express();
 
@@ -122,15 +125,37 @@ app.get('/temp/:temp/:location/:time', (req, res) => {
   res.json({ success: true });
 });
 
-
-app.get('/api/temp', (req, res) => {
+app.get('/api/main', (req, res) => {
   res.json({
     outside: find(lastEvents, event => {
       return event.name === 'temp' && event.data.location === 'Outside';
     }).data.temp,
     inside: find(lastEvents, event => {
       return event.name === 'temp' && event.data.location === 'Upstairs';
-    }).data.temp
+    }).data.temp,
+    summary: getSummary(lastEvents.filter(matchesProperty('name', 'recognized')).map(property('data')))
+  });
+});
+
+app.get('/api/detections', (req, res) => {
+  const detections = lastEvents
+  	.filter(matchesProperty('name', 'recognized'))
+  	.map(property('data'))
+  	.filter(obj => obj.score > 0.8)
+  	.map(({ capturePath, label, guess, score, time }) => {
+			const tagged = capturePath.substring(capturePath.lastIndexOf('/') + 1).replace(label, guess);
+  		const untagged = capturePath.substring(capturePath.lastIndexOf('/') + 1);
+      return {
+      	image: `http://richard.crushftp.com:5567/untagged/${untagged}`,
+      	image2: `http://richard.crushftp.com:5567/tagged/${tagged}`,
+      	guess,
+      	label,
+      	score: `(${Math.round(score * 100)}%)`,
+      	when: moment(time).fromNow()
+      };
+  	});
+  res.json({
+    detections
   });
 });
 
