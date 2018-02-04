@@ -134,8 +134,8 @@ app.get('/api/main', (req, res) => {
     return event.name === 'temp' && event.data.location === 'Upstairs';
   });
   res.json({
-    outside: outside ? outside.data.temp : 0,
-    inside: inside ? inside.data.temp : 0,
+    outside: outside ? outside.data.temp : 'none',
+    inside: inside ? inside.data.temp : 'none',
     summary: getSummary(lastEvents.filter(matchesProperty('name', 'recognized')).map(property('data')))
   });
 });
