@@ -136,6 +136,18 @@ app.get('/api/main', (req, res) => {
   res.json({
     outside: outside ? outside.data.temp : 'none',
     inside: inside ? inside.data.temp : 'none',
+    insideData: lastEvents
+      .filter(matchesProperty('name', 'temp'))
+      .filter(matchesProperty('data.location', 'Upstairs'))
+      .map(property('data.temp'))
+      .map(v => parseInt(v, 10))
+      .reverse(),
+    outsideData: lastEvents
+      .filter(matchesProperty('name', 'temp'))
+      .filter(matchesProperty('data.location', 'Outside'))
+      .map(property('data.temp'))
+      .map(v => parseInt(v, 10))
+      .reverse(),
     summary: getSummary(lastEvents.filter(matchesProperty('name', 'recognized')).map(property('data')))
   });
 });
