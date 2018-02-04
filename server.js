@@ -9,6 +9,7 @@ const find = require('lodash/find');
 const isEqual = require('lodash/isEqual');
 const matchesProperty = require('lodash/matchesProperty');
 const property = require('lodash/property');
+const moment = require('moment');
 const getSummary = require('./summary');
 
 const app = express();
