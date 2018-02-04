@@ -1,4 +1,5 @@
 const fs = require('fs');
+const basename = require('path').basename;
 const extension = require('path').extname;
 const ffmpeg = require('fluent-ffmpeg');
 const request = require('request');
@@ -55,19 +56,11 @@ function getNewObjects(objects) {
   return newObjects;
 }
 
-const createUploadOptions = path => {
-  return {
-    url: config.darknetApi,
-    formData: {
-      image: fs.createReadStream(path),
-    }
-  };
-};
-
 function detectObjects(path) {
   log('Detecting objects in', path, '...');
   return new Promise((resolve, reject) => {
-    request.post(createUploadOptions(path), (err, res, body) => {
+    const name = basename(path, '.png');
+    request(`${config.darknetApi}/${name}`, (err, res, body) => {
       if (err) {
         log('Detection failed', err);
         return reject(err);
