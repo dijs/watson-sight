@@ -127,13 +127,15 @@ app.get('/temp/:temp/:location/:time', (req, res) => {
 });
 
 app.get('/api/main', (req, res) => {
+  const outside = find(lastEvents, event => {
+    return event.name === 'temp' && event.data.location === 'Outside';
+  });
+  const inside = find(lastEvents, event => {
+    return event.name === 'temp' && event.data.location === 'Upstairs';
+  });
   res.json({
-    outside: find(lastEvents, event => {
-      return event.name === 'temp' && event.data.location === 'Outside';
-    }).data.temp,
-    inside: find(lastEvents, event => {
-      return event.name === 'temp' && event.data.location === 'Upstairs';
-    }).data.temp,
+    outside: outside ? outside.data.temp : 0,
+    inside: inside ? inside.data.temp : 0,
     summary: getSummary(lastEvents.filter(matchesProperty('name', 'recognized')).map(property('data')))
   });
 });
