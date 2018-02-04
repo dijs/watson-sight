@@ -69,10 +69,6 @@ function detectObjects(path) {
       log('Raw detections', JSON.stringify(detections, null, 3));
       const objects = detections
         .filter(([label, confidence]) => confidence >= config.minConfidence)
-        .map(p => {
-          log(p[0], 'passed the confidence test');
-          return p;
-        })
         .map(([label, confidence, [x, y, w, h]]) => {
           return {
             label,
@@ -82,6 +78,10 @@ function detectObjects(path) {
             h
           };
         });
+      const failCount = detections.length - objects.length;
+      if (failCount > 0) {
+        log(failCount, 'object(s) did not pass the confidence test');
+      }
       return resolve(objects);
     });
   });
