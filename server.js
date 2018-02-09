@@ -86,6 +86,14 @@ app.get('/add-label/:label', (req, res) => {
   }
 });
 
+app.get('/watch-image/:file', (req, res, next) => {
+  fs.createReadStream(`${__dirname}/watch-images/${req.params.file}`)
+    .on('error', err => {
+      next(new Error(`Could not find untagged image ${req.params.file}. ${err.message}`));
+    })
+    .pipe(res);
+});
+
 app.get('/untagged/:file', (req, res, next) => {
   fs.createReadStream(`${__dirname}/captures/${req.params.file}`)
     .on('error', err => {
@@ -157,12 +165,9 @@ app.get('/api/detections', (req, res) => {
   	.filter(matchesProperty('name', 'recognized'))
   	.map(property('data'))
   	.filter(obj => obj.score > 0.8)
-  	.map(({ capturePath, label, guess, score, time }) => {
-			const tagged = capturePath.substring(capturePath.lastIndexOf('/') + 1).replace(label, guess);
-  		const untagged = capturePath.substring(capturePath.lastIndexOf('/') + 1);
+  	.map(({ watchImage, label, guess, score, time }) => {
       return {
-      	image: `http://richard.crushftp.com:5567/untagged/${untagged}`,
-      	image2: `http://richard.crushftp.com:5567/tagged/${tagged}`,
+      	image: `http://richard.crushftp.com:5567/watch-image/${watchImage}`,
       	guess,
       	label,
       	score: `(${Math.round(score * 100)}%)`,

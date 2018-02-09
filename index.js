@@ -13,6 +13,7 @@ const config = require('./config.json');
 const getCaptures = require('./capture');
 const startServer = require('./server');
 const recognize = require('./recognize');
+const writeWatchImage = require('./watch-image');
 const EventEmitter = require('events');
 
 const log = debug('detect');
@@ -120,13 +121,16 @@ function handleDetection({ path, time }) {
           // Now try to recognize the object in the image
           return Promise.all(capturePaths.map((capturePath, index) => {
             return recognize(capturePath).then(info => {
-              // Assign results
-              const recog = Object.assign({} , newObjects[index], info);
-              DetectionEvents.emit('recognized', Object.assign({}, recog, {
-                time,
-                capturePath
-              }));
-              return recog;
+              return writeWatchImage(capturePath).then(watchImage => {
+                // Assign results
+                const recog = Object.assign({} , newObjects[index], info);
+                DetectionEvents.emit('recognized', Object.assign({}, recog, {
+                  time,
+                  capturePath,
+                  watchImage,
+                }));
+                return recog;
+              });
             });
           }));
         });
