@@ -169,7 +169,8 @@ const queue = createQueue(handleDetection, 'path');
 log('Started watching for new motion detected videos');
 watch.createMonitor(config.pathToVideos, monitor => {
   monitor.on('created', function (path, stat) {
-    if (extension(path) === '.m4v') {
+    // This handles videos with or without audio (from SecuritySpy)
+    if (extension(path) === '.m4v' || extension(path) === '.mov') {
       log('New video was created, fetching stills');
       DetectionEvents.emit('message', 'Motion Detected');
       getStills(path);
