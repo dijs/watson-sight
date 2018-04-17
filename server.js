@@ -10,6 +10,7 @@ const isEqual = require('lodash/isEqual');
 const matchesProperty = require('lodash/matchesProperty');
 const property = require('lodash/property');
 const moment = require('moment');
+const batteryLevel = require('battery-level');
 const getSummary = require('./summary');
 
 const app = express();
@@ -40,6 +41,10 @@ function addToLastEvents(name, data) {
 }
 
 app.use(cors());
+
+app.get('/battery-level', (req, res) => {
+  batteryLevel().then(level => res.json({ level }));
+});
 
 app.get('/untagged', (req, res) => {
   res.json(fs.readdirSync('./captures').filter(filename => filename.indexOf('.') !== 0));
@@ -189,14 +194,16 @@ io.on('connection', socket => {
 const start = DetectionEvents => {
   http.listen(config.serverPort);
   log(`Listening @ http://localhost:${config.serverPort}`);
-  // Forward detection events to all sockets
-  DetectionEvents.on('message', message => io.emit('message', message));
-  DetectionEvents.on('detected', objects => io.emit('detected', objects));
-  DetectionEvents.on('recognized', data => {
-    // Save to queue
-    addToLastEvents('recognized', data);
-    io.emit('recognized', data);
-  });
+  if (DetectionEvents) {
+    // Forward detection events to all sockets
+    DetectionEvents.on('message', message => io.emit('message', message));
+    DetectionEvents.on('detected', objects => io.emit('detected', objects));
+    DetectionEvents.on('recognized', data => {
+      // Save to queue
+      addToLastEvents('recognized', data);
+      io.emit('recognized', data);
+    });
+  }
 };
 
 module.exports = start;
