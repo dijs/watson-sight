@@ -12,6 +12,7 @@ const property = require('lodash/property');
 const moment = require('moment');
 const batteryLevel = require('battery-level');
 const getSummary = require('./summary');
+const fetchGraphData = require('./db');
 
 const app = express();
 
@@ -44,6 +45,10 @@ app.use(cors());
 
 app.get('/battery-level', (req, res) => {
   batteryLevel().then(level => res.json({ level }));
+});
+
+app.get('/graph/:table/data', (req, res) => {
+  fetchGraphData(req.params.table).then(data => res.json(data));
 });
 
 app.get('/untagged', (req, res) => {
@@ -131,11 +136,19 @@ app.get('/negative/:file', (req, res) => {
   res.json({ success: true });
 });
 
+// TODO: Generalize these for ALL reporting
 app.get('/temp/:temp/:location/:time', (req, res) => {
   const { temp, location, time } = req.params;
   const data = { temp, location, time };
   io.emit('temp', data);
   addToLastEvents('temp', data);
+  res.json({ success: true });
+});
+app.get('/moisture/:temp/:location/:time', (req, res) => {
+  const { moisture, location, time } = req.params;
+  const data = { moisture, location, time };
+  io.emit('moisture', data);
+  addToLastEvents('moisture', data);
   res.json({ success: true });
 });
 
