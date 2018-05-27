@@ -47,8 +47,10 @@ app.get('/battery-level', (req, res) => {
   batteryLevel().then(level => res.json({ level }));
 });
 
-app.get('/graph/:table/data', (req, res) => {
-  fetchGraphData(req.params.table).then(data => res.json(data));
+app.get('/graph/:table/data', (req, res, next) => {
+  fetchGraphData(req.params.table, req.query.hours)
+    .then(data => res.json(data))
+    .catch(err => next(err));
 });
 
 app.get('/untagged', (req, res) => {

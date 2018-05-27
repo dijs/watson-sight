@@ -17,13 +17,13 @@ const preformQuery = (...args) => {
     .then(res => client.end().then(() => res.rows));
 };
 
-const fetch = table => {
+// default 12 hour window
+const fetch = (table, hours = 12) => {
   const sql = jsonSql.build({
     type: 'select',
     table,
     condition: {
-      // 12 hour window
-      time: {$gt: new Date(+new Date() - 1000 * 60 * 60 * 12)}
+      time: { $gt: new Date(+new Date() - 1000 * 60 * 60 * hours) }
     }    
   });
   return preformQuery(sql.query, sql.values);
