@@ -18,7 +18,7 @@ const preformQuery = (...args) => {
 };
 
 // default 12 hour window
-const fetch = (table, hours = 12) => {
+const fetch = (table, hours = 12, spacing = 1) => {
   const sql = jsonSql.build({
     type: 'select',
     table,
@@ -26,7 +26,8 @@ const fetch = (table, hours = 12) => {
       time: { $gt: new Date(+new Date() - 1000 * 60 * 60 * hours) }
     }    
   });
-  return preformQuery(sql.query, sql.values);
+  return preformQuery(sql.query, sql.values)
+    .then(rows => rows.filter((row, index) => index % spacing === 0));
 };
 
 module.exports = fetch;

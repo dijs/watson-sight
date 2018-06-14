@@ -18,6 +18,7 @@ const app = express();
 
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const apicache = require('apicache');
 
 const log = debug('detect.server');
 const recognize = require('./recognize');
@@ -47,8 +48,10 @@ app.get('/battery-level', (req, res) => {
   batteryLevel().then(level => res.json({ level }));
 });
 
-app.get('/graph/:table/data', (req, res, next) => {
-  fetchGraphData(req.params.table, req.query.hours)
+const cache = apicache.middleware;
+
+app.get('/graph/:table/data', cache('5 minutes'), (req, res, next) => {
+  fetchGraphData(req.params.table, req.query.hours, req.query.spacing)
     .then(data => res.json(data))
     .catch(err => next(err));
 });

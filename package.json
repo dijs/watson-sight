@@ -9,6 +9,7 @@
   "author": "Richard van der Dys",
   "license": "MIT",
   "dependencies": {
+    "apicache": "^1.2.1",
     "battery-level": "^3.0.0",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
