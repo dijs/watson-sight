@@ -48,6 +48,24 @@ app.get('/battery-level', (req, res) => {
   batteryLevel().then(level => res.json({ level }));
 });
 
+let onlineCheckCount = 1;
+let onlineHits = 1;
+
+app.get('/online/:status', (req, res) => {
+  onlineCheckCount++;
+  if (req.params.status === '1') onlineHits++;
+  io.emit('online', onlineHits / onlineCheckCount);
+  res.send('good');
+});
+
+app.get('/online', (req, res) => {
+  res.json({
+    onlineHits,
+    onlineCheckCount,
+    status: onlineHits / onlineCheckCount
+  });
+});
+
 const cache = apicache.middleware;
 
 app.get('/graph/:table/data', cache('5 minutes'), (req, res, next) => {
