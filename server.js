@@ -217,9 +217,9 @@ app.get('/api/detections', (req, res) => {
 
 app.get('/', (req, res) => res.send('Welcome to the Watson Object Tagger'));
 
-
 io.on('connection', socket => {
   socket.emit('update', lastEvents);
+  io.emit('score', lastScore);
 });
 
 const start = DetectionEvents => {
