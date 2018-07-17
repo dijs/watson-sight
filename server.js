@@ -50,8 +50,8 @@ app.get('/battery-level', (req, res) => {
 
 let lastScore = 0;
 app.get('/online/:score', (req, res) => {
-  lastScore = score;
-  io.emit('score', score);
+  lastScore = req.params.score;
+  io.emit('score', lastScore);
   res.send('good');
 });
 
