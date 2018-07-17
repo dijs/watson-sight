@@ -48,21 +48,16 @@ app.get('/battery-level', (req, res) => {
   batteryLevel().then(level => res.json({ level }));
 });
 
-let onlineCheckCount = 1;
-let onlineHits = 1;
-
-app.get('/online/:status', (req, res) => {
-  onlineCheckCount++;
-  if (req.params.status === '1') onlineHits++;
-  io.emit('online', onlineHits / onlineCheckCount);
+let lastScore = 0;
+app.get('/online/:score', (req, res) => {
+  lastScore = score;
+  io.emit('score', score);
   res.send('good');
 });
 
 app.get('/online', (req, res) => {
   res.json({
-    onlineHits,
-    onlineCheckCount,
-    status: onlineHits / onlineCheckCount
+    score: lastScore
   });
 });
 
