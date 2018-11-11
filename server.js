@@ -201,12 +201,19 @@ app.get('/api/detections', (req, res) => {
   	.filter(matchesProperty('name', 'recognized'))
   	.map(property('data'))
   	.filter(obj => obj.score > 0.8)
-  	.map(({ watchImage, label, guess, score, time }) => {
+  	.map(({ capturePath, label, guess, score, time }) => {
+      const untagged = capturePath.substring(capturePath.lastIndexOf('/') + 1);
+      const tagged = capturePath
+        .substring(capturePath.lastIndexOf('/') + 1)
+        .replace(label, guess);
+      const image = `http://richard.crushftp.com:5567/tagged/${tagged}`;
+      const backupImage = `http://richard.crushftp.com:5567/untagged/${untagged}`;
       return {
-      	image: `http://richard.crushftp.com:5567/watch-image/${watchImage}`,
+      	image,
+        backupImage,
       	guess,
       	label,
-      	score: `(${Math.round(score * 100)}%)`,
+      	score: Math.round(score * 100),
       	when: moment(time).fromNow()
       };
   	});
