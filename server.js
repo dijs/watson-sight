@@ -36,7 +36,7 @@ try {
 
 function addToLastEvents(name, data) {
   lastEvents.unshift({ name, data });
-  if (lastEvents.length > 100) {
+  if (lastEvents.length > 512) {
     lastEvents.pop();
   }
   fs.writeFileSync('./last-events.json', JSON.stringify(lastEvents, null, 3));
