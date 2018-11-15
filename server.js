@@ -12,6 +12,7 @@ const property = require('lodash/property');
 const moment = require('moment');
 const batteryLevel = require('battery-level');
 const getSummary = require('./summary');
+const crop = require('./crop');
 const fetchGraphData = require('./db');
 
 const app = express();
@@ -113,6 +114,8 @@ app.get('/add-label/:label', (req, res) => {
     });
   }
 });
+
+app.get('/crop/:file', crop);
 
 app.get('/watch-image/:file', (req, res, next) => {
   fs.createReadStream(`${__dirname}/watch-images/${req.params.file}`)
