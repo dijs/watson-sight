@@ -96,6 +96,9 @@ function getStills(path) {
       filename: `still-${timestamp}-%i.png`,
       folder: 'stills',
       size: `${config.stillWidth}x${config.stillHeight}`,
+    })
+    .on('error', function(err) {
+      console.log('Cannot get screenshots', err.message);
     });
 }
 
@@ -177,9 +180,7 @@ watch.createMonitor(config.pathToVideos, monitor => {
     if (extension(path) === '.m4v' || extension(path) === '.mov') {
       log('New video was created, fetching stills');
       DetectionEvents.emit('message', 'Motion Detected');
-      getStills(path).catch(err => {
-        log('Failed to get stills', err.message);
-      });
+      getStills(path);
     }
   });
 });
