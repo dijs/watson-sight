@@ -177,7 +177,9 @@ watch.createMonitor(config.pathToVideos, monitor => {
     if (extension(path) === '.m4v' || extension(path) === '.mov') {
       log('New video was created, fetching stills');
       DetectionEvents.emit('message', 'Motion Detected');
-      getStills(path);
+      getStills(path).catch(err => {
+        log('Failed to get stills', err.message);
+      });
     }
   });
 });
